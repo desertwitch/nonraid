@@ -283,6 +283,20 @@ EOF
     [[ "$output" =~ WARNING.*15\ total ]]
 }
 
+@test "status parsing - Array with Q" {
+    # Create mock with Q disk - need to override the basic template
+    create_mock_nmdstat "STARTED" 0 0 > "$BATS_TMPDIR/mock_nmdstat_dual_parity"
+    sed -i -e 's/diskSize.29=0/diskSize.29=1500000\\ndiskId.29=MOCK_PARITY_DISK_2\\nrdevName.29=sdd1\\nrdevStatus.29=DISK_OK\\nrdevNumErrors.29=0/' \
+           "$BATS_TMPDIR/mock_nmdstat_dual_parity"
+
+    export PROC_NMDSTAT="$BATS_TMPDIR/mock_nmdstat_dual_parity"
+    run show_status
+
+    echo "$status"
+    echo "$output"
+    [ "$status" -eq 1 ]
+}
+
 @test "unassigning a disk" {
     create_mock_nmdstat "STOPPED" 0 0 > "$BATS_TMPDIR/mock_nmdstat_stopped"
 
